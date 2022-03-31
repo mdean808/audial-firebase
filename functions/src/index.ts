@@ -29,7 +29,7 @@ export const tracks = functions.https.onRequest(async (req, res) => {
 export const daily = functions.https.onRequest(async (req, res) => {
   res.set('Access-Control-Allow-Origin', '*');
 
-  const playlistId = req.query.id as string || DEFAULT_PLAYLIST;
+  const playlistId = req.query.playlist as string || DEFAULT_PLAYLIST;
   const random = req.query.random === 'true';
 
   functions.logger.info('Requesting playlist daily ' + playlistId + (random ? 'with a random song.' : '.'));
