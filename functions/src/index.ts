@@ -29,7 +29,7 @@ export const daily = functions.https.onRequest(async (req, res) => {
   const tracks = await getTracks(playlistId);
   // perform random index finding
   const index = generateRandomIndex(tracks.length, random);
-  res.json(tracks[index]);
+  res.json({daily: tracks[index], tracks});
 });
 
 
