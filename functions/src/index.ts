@@ -1,6 +1,6 @@
 import * as functions from 'firebase-functions';
 import {getAllSpotifyPlaylistTracks, getSpotifyPlaylist, getSpotifyToken} from './api/spotify';
-import {SpotifyToken} from './types';
+import {SpotifyPlaylistTracks, SpotifyToken} from './types';
 import {generateRandomIndex} from './api/util';
 import {
   getCachedPlaylists,
@@ -18,21 +18,52 @@ admin.initializeApp();
 
 export const tracks = functions.https.onRequest(async (req, res) => {
   res.set('Access-Control-Allow-Origin', '*');
-  const playlistId = req.query.playlist as string || DEFAULT_PLAYLIST;
+  const playlistId = req.query.playlist as string || getDefaultPlaylistId(new Date().toDateString());
   res.json(await getTracks(playlistId));
 });
 
 export const daily = functions.https.onRequest(async (req, res) => {
   res.set('Access-Control-Allow-Origin', '*');
-  const playlistId = req.query.playlist as string || DEFAULT_PLAYLIST;
-  const random = req.query.random === 'true';
   const dateLocale = req.query.locale as string || new Date().toDateString();
+  const playlistId = req.query.playlist as string || getDefaultPlaylistId(dateLocale);
+  const random = req.query.random === 'true';
   const tracks = await getTracks(playlistId);
   // perform random index finding
   const index = generateRandomIndex(tracks.length, new Date(dateLocale), random);
   res.json({daily: tracks[index], tracks});
 });
 
+const getDefaultPlaylistId = (localeString: string) => {
+  let id = '';
+  const day = new Date(localeString).getDay();
+  switch (day) {
+    case 0:
+      id = '37i9dQZF1DWSV3Tk4GO2fq';
+      break;
+    case 1:
+      id = '37i9dQZF1DX4UtSsGT1Sbe';
+      break;
+    case 2:
+      id = '37i9dQZF1DX4o1oenSJRJd';
+      break;
+    case 3:
+      id = '37i9dQZF1DWTJ7xPn4vNaz';
+      break;
+    case 4:
+      id = '37i9dQZF1DXaKIA8E7WcJj';
+      break;
+    case 5:
+      id = '37i9dQZF1DX5Ejj0EkURtP';
+      break;
+    case 6:
+      id = '37i9dQZF1DXbTxeAdrVG2l';
+      break;
+    default:
+      id = DEFAULT_PLAYLIST;
+      break;
+  }
+  return id;
+};
 
 const getTracks = async (playlistId: string) => {
   // update the cache from the db
@@ -54,6 +85,10 @@ const getTracks = async (playlistId: string) => {
   // update the cache if need be
   if (!playlistInCache) {
     cachedPlaylists.push(playlist);
+    // remove tracks for better data management
+    for (const playlist of cachedPlaylists) {
+      playlist.tracks = <SpotifyPlaylistTracks><unknown>[];
+    }
     await savePlaylistsToCache(cachedPlaylists);
   }
   if (!tracksInCache) {

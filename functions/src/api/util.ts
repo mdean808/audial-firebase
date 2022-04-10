@@ -7,7 +7,7 @@ export const daysBetweenDates = (d1: Date, d2: Date) => {
 
 export const generateRandomIndex = (length: number, dateSeed: Date, random: boolean) => {
   const date = dateSeed || new Date();
-  date.setDate(date.getDate() + 1); // force add day just to be unpredictable
+  date.setDate(date.getDate() + 1); // force add a day or 2 just to be unpredictable
   const forceRand = random ? Math.random() * 10 * (Math.random() + 20) : 0;
   const seed = daysBetweenDates(date, new Date('01/15/2002')) + forceRand;
   const rand = mulberry32(seed)();
