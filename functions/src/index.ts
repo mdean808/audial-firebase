@@ -26,9 +26,10 @@ export const daily = functions.https.onRequest(async (req, res) => {
   res.set('Access-Control-Allow-Origin', '*');
   const playlistId = req.query.playlist as string || DEFAULT_PLAYLIST;
   const random = req.query.random === 'true';
+  const dateLocale = req.query.locale as string || new Date().toDateString();
   const tracks = await getTracks(playlistId);
   // perform random index finding
-  const index = generateRandomIndex(tracks.length, random);
+  const index = generateRandomIndex(tracks.length, new Date(dateLocale), random);
   res.json({daily: tracks[index], tracks});
 });
 

@@ -55,7 +55,6 @@ export const getAllSpotifyPlaylistTracks = async (playlist: SpotifyPlaylist, tok
       },
       method: 'GET',
     });
-    console.log(res.data);
     const newTracks = await res.data;
     if (newTracks.error) {
       throw new Error(`Oops! ${newTracks.error.status}: ${newTracks.error.message}`);
