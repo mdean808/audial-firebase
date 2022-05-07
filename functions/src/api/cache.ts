@@ -12,7 +12,6 @@ export const getCachedPlaylist = async (id: string) => {
     res.forEach((snapshot) => {
       playlists.push(snapshot.val());
     });
-    logger.info('Grabbed playlists:', playlists);
     return playlists ? playlists[0] as SpotifyPlaylist : null;
   } catch (e) {
     logger.info(e);
@@ -23,7 +22,9 @@ export const getCachedPlaylist = async (id: string) => {
 export const savePlaylistToCache = async (playlist: SpotifyPlaylist) => {
   logger.info('Adding playlist', playlist.id, 'to cache.');
   const ref = admin.database().ref('playlists');
-  await ref.push(playlist);
+  const res = await ref.orderByKey().ref.orderByChild('id').equalTo(playlist.id).get();
+  if (res.val()) return;
+  else await ref.push(playlist);
 };
 
 export const getCachedTracksByPlaylist = async (id: string) => {
@@ -41,5 +42,7 @@ export const getCachedTracksByPlaylist = async (id: string) => {
 export const savePlaylistTracksToCache = async (trackSet: {playlist: string, tracks: SpotifyTrack[]}) => {
   logger.info('Adding tracks for playlist', trackSet.playlist, ' to cache.');
   const ref = admin.database().ref('tracksByPlaylist');
-  await ref.push(trackSet);
+  const res = await ref.orderByKey().ref.orderByChild('playlist').equalTo(trackSet.playlist).get();
+  if (res.val()) return;
+  else await ref.push(trackSet);
 };
