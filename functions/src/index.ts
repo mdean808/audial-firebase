@@ -3,10 +3,10 @@ import {getAllSpotifyPlaylistTracks, getSpotifyPlaylist, getSpotifyToken} from '
 import {SpotifyPlaylistTracks, SpotifyToken} from './types';
 import {generateRandomIndex} from './api/util';
 import {
-  getCachedPlaylists,
+  getCachedPlaylist,
   getCachedTracksByPlaylist,
-  savePlaylistsToCache,
-  saveTracksByPlaylistToCache,
+  savePlaylistToCache,
+  savePlaylistTracksToCache,
 } from './api/cache';
 import * as admin from 'firebase-admin';
 
@@ -74,8 +74,8 @@ const getTracks = async (playlistId: string) => {
   console.log(cached);
 */
   // update the cache from the db
-  const cachedPlaylists = await getCachedPlaylists(playlistId);
-  const cachedTracksByPlaylist = await getCachedTracksByPlaylist(playlistId);
+  const cachedPlaylist = await getCachedPlaylist(playlistId);
+  const cachedPlaylistTracks = await getCachedTracksByPlaylist(playlistId);
   // load token from cache or update it if need be
   if (!spotifyAuth.token) {
     spotifyAuth = await getSpotifyToken();
@@ -84,23 +84,17 @@ const getTracks = async (playlistId: string) => {
     spotifyAuth = await getSpotifyToken();
   }
   // load from cache or make requests
-  const playlistInCache = cachedPlaylists.find((p) => p.id === playlistId);
-  const tracksInCache = cachedTracksByPlaylist.find((t) => t.playlist == playlistId);
-  const playlist = playlistInCache || await getSpotifyPlaylist(playlistId, spotifyAuth.token);
-  const tracks = tracksInCache ? tracksInCache.tracks : await getAllSpotifyPlaylistTracks(playlist, spotifyAuth.token);
+  const playlist = cachedPlaylist || await getSpotifyPlaylist(playlistId, spotifyAuth.token);
+  const tracks = cachedPlaylistTracks ? cachedPlaylistTracks.tracks : await getAllSpotifyPlaylistTracks(playlist, spotifyAuth.token);
 
   // update the cache if need be
-  if (!playlistInCache) {
-    cachedPlaylists.push(playlist);
+  if (!cachedPlaylist) {
     // remove tracks for better data management
-    for (const playlist of cachedPlaylists) {
-      playlist.tracks = <SpotifyPlaylistTracks><unknown>[];
-    }
-    await savePlaylistsToCache(cachedPlaylists);
+    playlist.tracks = <SpotifyPlaylistTracks><unknown>[];
+    await savePlaylistToCache(playlist);
   }
-  if (!tracksInCache) {
-    cachedTracksByPlaylist.push({playlist: playlist.id, tracks});
-    await saveTracksByPlaylistToCache(cachedTracksByPlaylist);
+  if (!cachedPlaylistTracks) {
+    await savePlaylistTracksToCache({playlist: playlist.id, tracks});
   }
   return tracks;
 };

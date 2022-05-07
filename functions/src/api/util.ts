@@ -1,4 +1,3 @@
-import {logger} from 'firebase-functions';
 
 export const daysBetweenDates = (d1: Date, d2: Date) => {
   const diffTime = Math.abs(d1.getTime() - d2.getTime());
@@ -11,8 +10,6 @@ export const generateRandomIndex = (length: number, dateSeed: Date, random: bool
   const forceRand = random ? Math.random() * 10 * (Math.random() + 20) : 0;
   const seed = daysBetweenDates(date, new Date('01/15/2002')) + forceRand;
   const rand = mulberry32(seed)();
-  logger.info('Random Index Seed:', seed);
-  logger.info('Random Index Result:', rand, Math.floor(rand * length));
   return Math.floor(rand * length);
 };
 
