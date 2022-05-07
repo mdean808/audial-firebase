@@ -1,6 +1,12 @@
 {
   "rules": {
     ".read": false,
-    ".write": false
+    ".write": false,
+    "playlists": {
+      ".indexOn": ["id"]
+    },
+    "tracksByPlaylist": {
+      ".indexOn": ["playlist"]
+    }
   }
 }
