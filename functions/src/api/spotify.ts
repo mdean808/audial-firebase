@@ -3,13 +3,14 @@ import axios from 'axios';
 import {logger} from 'firebase-functions';
 
 const SPOTIFY_FIELDS_QUERY = 'items(track(artists(href,id,name),href,id,name,preview_url)),tracks.next';
+const SPOTIFY_AUTH = Buffer.from(process.env.SPOTIFY_CLIENT + ':' + process.env.SPOTIFY_SECRET).toString('base64');
 
 export const getSpotifyToken = async () => {
   const data = new URLSearchParams();
   data.append('grant_type', 'client_credentials');
 
   const headers = {
-    'Authorization': 'Basic ' + process.env.SPOTIFY_AUTH,
+    'Authorization': 'Basic ' + SPOTIFY_AUTH,
     'Content-Type': 'application/x-www-form-urlencoded',
   };
 

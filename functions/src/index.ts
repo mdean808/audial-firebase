@@ -38,25 +38,25 @@ const getDefaultPlaylistId = (localeString: string) => {
   const day = new Date(localeString).getDay();
   switch (day) {
     case 0:
-      id = '37i9dQZF1DWSV3Tk4GO2fq';
+      id = '37i9dQZF1DWSV3Tk4GO2fq'; // sunday
       break;
     case 1:
-      id = '37i9dQZF1DX4UtSsGT1Sbe';
+      id = '37i9dQZF1DX4UtSsGT1Sbe'; // monday
       break;
     case 2:
-      id = '37i9dQZF1DX4o1oenSJRJd';
+      id = '37i9dQZF1DX4o1oenSJRJd'; // tuesday
       break;
     case 3:
-      id = '37i9dQZF1DWTJ7xPn4vNaz';
+      id = '37i9dQZF1DWTJ7xPn4vNaz'; // wednesday
       break;
     case 4:
-      id = '37i9dQZF1DXaKIA8E7WcJj';
+      id = '37i9dQZF1DXaKIA8E7WcJj'; // thursday
       break;
     case 5:
-      id = '37i9dQZF1DX5Ejj0EkURtP';
+      id = '37i9dQZF1DX5Ejj0EkURtP'; // friday
       break;
     case 6:
-      id = '37i9dQZF1DXbTxeAdrVG2l';
+      id = '37i9dQZF1DXbTxeAdrVG2l'; // saturday
       break;
     default:
       id = DEFAULT_PLAYLIST;
@@ -65,10 +65,17 @@ const getDefaultPlaylistId = (localeString: string) => {
   return id;
 };
 
+// const playlistPresets = ['37i9dQZF1DWSV3Tk4GO2fq', '37i9dQZF1DX4UtSsGT1Sbe', '37i9dQZF1DX4o1oenSJRJd', '37i9dQZF1DWTJ7xPn4vNaz', '37i9dQZF1DXaKIA8E7WcJj', '37i9dQZF1DX5Ejj0EkURtP', '37i9dQZF1DXbTxeAdrVG2l'];
+
 const getTracks = async (playlistId: string) => {
+/*
+  let cached = false;
+  if (playlistPresets.find((p) => playlistId === p)) cached = false;
+  console.log(cached);
+*/
   // update the cache from the db
-  const cachedPlaylists = await getCachedPlaylists();
-  const cachedTracksByPlaylist = await getCachedTracksByPlaylist();
+  const cachedPlaylists = await getCachedPlaylists(playlistId);
+  const cachedTracksByPlaylist = await getCachedTracksByPlaylist(playlistId);
   // load token from cache or update it if need be
   if (!spotifyAuth.token) {
     spotifyAuth = await getSpotifyToken();
