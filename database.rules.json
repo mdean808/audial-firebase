@@ -3,10 +3,24 @@
     ".read": false,
     ".write": false,
     "playlists": {
-      ".indexOn": ["id"]
+      "$playlist": {
+        ".indexOn": [
+          "id"
+        ]
+      },
+      ".indexOn": [
+        "id"
+      ]
     },
     "tracksByPlaylist": {
-      ".indexOn": ["playlist"]
+      "$tracks" : {
+        ".indexOn": [
+          "playlist"
+        ]
+      },
+      ".indexOn": [
+        "playlist"
+      ]
     }
   }
 }
