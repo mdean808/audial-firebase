@@ -37,7 +37,7 @@ firebase deploy --only functions,database
 
 Generate a Spotify App from their [developer dashboard](https://developer.spotify.com/dashboard/applications)
 
-Copy the Client ID and Client Secret into a `.env` file in the root project directory.
+Copy the Client ID and Client Secret into a `.env` file in the functions directory.
 
 ```dotenv
 SPOTIFY_CLIENT=''
