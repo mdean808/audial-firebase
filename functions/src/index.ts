@@ -16,21 +16,19 @@ let spotifyAuth = <SpotifyToken>{};
 
 admin.initializeApp();
 
-export const tracks = functions.https.onRequest(async (req, res) => {
-  res.set('Access-Control-Allow-Origin', '*');
-  const playlistId = req.query.playlist as string || getDefaultPlaylistId(new Date().toDateString());
-  res.json(await getTracks(playlistId));
-});
-
 export const daily = functions.https.onRequest(async (req, res) => {
   res.set('Access-Control-Allow-Origin', '*');
-  const dateLocale = req.query.locale as string || new Date().toDateString();
-  const playlistId = req.query.playlist as string || getDefaultPlaylistId(dateLocale);
-  const random = req.query.random === 'true';
-  const tracks = await getTracks(playlistId);
-  // perform random index finding
-  const index = generateRandomIndex(tracks.length, new Date(dateLocale), random);
-  res.json({daily: tracks[index], tracks});
+  if (req.query.playlist as string === 'undefined' || ((req.query.playlist as string).length !== 22 && (req.query.playlist as string).length !== 0)) {
+    res.status(400).json({message: 'Invalid Spotify playlist.'});
+  } else {
+    const dateLocale = req.query.locale as string || new Date().toDateString();
+    const playlistId = req.query.playlist as string || getDefaultPlaylistId(dateLocale);
+    const random = req.query.random === 'true';
+    const tracks = await getTracks(playlistId);
+    // perform random index finding
+    const index = generateRandomIndex(tracks.length, new Date(dateLocale), random);
+    res.json({daily: tracks[index], tracks});
+  }
 });
 
 const getDefaultPlaylistId = (localeString: string) => {
@@ -65,14 +63,7 @@ const getDefaultPlaylistId = (localeString: string) => {
   return id;
 };
 
-// const playlistPresets = ['37i9dQZF1DWSV3Tk4GO2fq', '37i9dQZF1DX4UtSsGT1Sbe', '37i9dQZF1DX4o1oenSJRJd', '37i9dQZF1DWTJ7xPn4vNaz', '37i9dQZF1DXaKIA8E7WcJj', '37i9dQZF1DX5Ejj0EkURtP', '37i9dQZF1DXbTxeAdrVG2l'];
-
 const getTracks = async (playlistId: string) => {
-/*
-  let cached = false;
-  if (playlistPresets.find((p) => playlistId === p)) cached = false;
-  console.log(cached);
-*/
   // update the cache from the db
   const cachedPlaylist = await getCachedPlaylist(playlistId);
   const cachedPlaylistTracks = await getCachedTracksByPlaylist(playlistId);
