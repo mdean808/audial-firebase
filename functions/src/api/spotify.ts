@@ -1,22 +1,25 @@
-import type {SpotifyPlaylist, SpotifyToken} from '../types';
-import axios from 'axios';
-import {logger} from 'firebase-functions';
+import type { SpotifyPlaylist, SpotifyToken } from "../types";
+import axios from "axios";
+import { logger } from "firebase-functions";
 
-const SPOTIFY_FIELDS_QUERY = 'items(track(artists(href,id,name),href,id,name,preview_url)),tracks.next';
-const SPOTIFY_AUTH = Buffer.from(process.env.SPOTIFY_CLIENT + ':' + process.env.SPOTIFY_SECRET).toString('base64');
+const SPOTIFY_FIELDS_QUERY =
+  "items(track(artists(href,id,name),href,id,name,preview_url)),tracks.next";
+const SPOTIFY_AUTH = Buffer.from(
+  process.env.SPOTIFY_CLIENT + ":" + process.env.SPOTIFY_SECRET,
+).toString("base64");
 
 export const getSpotifyToken = async () => {
   const data = new URLSearchParams();
-  data.append('grant_type', 'client_credentials');
+  data.append("grant_type", "client_credentials");
 
   const headers = {
-    'Authorization': 'Basic ' + SPOTIFY_AUTH,
-    'Content-Type': 'application/x-www-form-urlencoded',
+    Authorization: "Basic " + SPOTIFY_AUTH,
+    "Content-Type": "application/x-www-form-urlencoded",
   };
 
   const res = await axios({
-    url: 'https://accounts.spotify.com/api/token',
-    method: 'POST',
+    url: "https://accounts.spotify.com/api/token",
+    method: "POST",
     data,
     headers,
   });
@@ -30,35 +33,41 @@ export const getSpotifyToken = async () => {
 };
 
 export const getSpotifyPlaylist = async (playlist: string, token: string) => {
-  logger.info('Playlist not cached. Requesting it from Spotify...');
-  const res = await axios( {
+  logger.info("Playlist not cached. Requesting it from Spotify...");
+  const res = await axios({
     url: `https://api.spotify.com/v1/playlists/${playlist}/?fields=description,href,id,images,name,tracks.${SPOTIFY_FIELDS_QUERY}`,
     headers: {
-      accept: 'application/json',
+      accept: "application/json",
       authorization: `Bearer ${token}`,
     },
-    method: 'GET',
+    method: "GET",
   });
   const json: SpotifyPlaylist = await res.data;
   return json;
 };
 
-export const getAllSpotifyPlaylistTracks = async (playlist: SpotifyPlaylist, token: string) => {
-  logger.info('Playlist tracks not cached. Requesting them from Spotify...');
-  let items = playlist.tracks.items;
-  let next = playlist.tracks.next;
+export const getAllSpotifyPlaylistTracks = async (
+  playlist: SpotifyPlaylist,
+  token: string,
+) => {
+  logger.info("Playlist tracks not cached. Requesting them from Spotify...");
+  let items = playlist.tracks?.items;
+  let next = playlist.tracks?.next;
+  if (items[0] && !next) next = items[0].track.uri;
   while (next) {
     const res = await axios({
       url: next + `&fields=${SPOTIFY_FIELDS_QUERY},next`,
       headers: {
-        accept: 'application/json',
+        accept: "application/json",
         authorization: `Bearer ${token}`,
       },
-      method: 'GET',
+      method: "GET",
     });
     const newTracks = await res.data;
     if (newTracks.error) {
-      throw new Error(`Oops! ${newTracks.error.status}: ${newTracks.error.message}`);
+      throw new Error(
+        `Oops! ${newTracks.error.status}: ${newTracks.error.message}`,
+      );
     }
     items = items.concat(newTracks.items);
     next = newTracks.next;
